@@ -7,7 +7,7 @@ library(shiny)
 #--------Setting-Working-Directory---------------------------------------------------------------------------
 
 #HomePC
-workingdirectory = 'E:\\E01_College\\002_CurrentClasses\\03_MBA-694_TellingStoriesWithData\\TellingStories_Dashboard\\Module2_Dashboard\\data'
+workingdirectory = 'E:\\E01_College\\002_CurrentClasses\\03_MBA-694_TellingStoriesWithData\\Telling-Stories-Part-2-SubaruForesters-Dashboard\\data'
 
 
 #Laptop
@@ -24,10 +24,10 @@ names(subi_forester)
 #-------------Filtering-----------------
 
 
-subi_forester = carbit_list %>%
-  filter(make == "subaru" & model == "forester" & odometer < 200000 & price < 40000) %>%
-  select(url, location, time_posted, make, model, year, odometer, title, paint, 
-         cylinders, fuel, type, transmission, condition, price, num_images, latitude, longitude)
+# subi_forester = carbit_list %>%
+#   filter(make == "subaru" & model == "forester" & odometer < 200000 & price < 40000) %>%
+#   select(url, location, time_posted, make, model, year, odometer, title, paint, 
+#          cylinders, fuel, type, transmission, condition, price, num_images, latitude, longitude)
 
 
 
@@ -47,12 +47,12 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       # Add Shiny widgets here (e.g., sliderInput, checkboxInput, selectInput)
-      sliderInput("slider", "Select a value:", min = 1, max = 40000, value = 5),
+      sliderInput("slider", "Select a value:", min = 0, max = 40000, value = c(0,40000)),
       # Dropdown menu for x-axis variable
-      selectInput("xvar", "Select X-axis Variable:", choices = names(subi_forester)[c(7,)], selected = names(subi_forester)[15]),
+      selectInput("xvar", "Select X-axis Variable:", choices = names(subi_forester)[c(7,15)], selected = names(subi_forester)[15]),
       
       # Dropdown menu for y-axis variable
-      selectInput("yvar", "Select Y-axis Variable:", choices = names(subi_forester), selected = names(subi_forester)[7])
+      selectInput("yvar", "Select Y-axis Variable:", choices = names(subi_forester)[c(7,15)], selected = names(subi_forester)[7])
     ),
     mainPanel(
       plotOutput("plot")  # This is where the ggplot2 plot will be displayed
@@ -68,7 +68,7 @@ server <- function(input, output) {
   # Create a reactive object that depends on the slider input
   reactive_data <- reactive({
     data <- subi_forester[, c(input$xvar, input$yvar)]
-    filtered_data <- data[data[, input$xvar] <= input$slider, ]
+    filtered_data <- data[data[, input$xvar] <= input$slider[2] & data[, input$xvar] >= input$slider[1], ]
     return(filtered_data)
   })
   
