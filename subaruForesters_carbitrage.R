@@ -1,8 +1,10 @@
 library(ggplot2)
 library(dplyr)
 library(ggforce)
-library(lubridate)
 library(shiny)
+library(ggmap)
+library(googleway)
+
 
 #--------Setting-Working-Directory---------------------------------------------------------------------------
 
@@ -31,10 +33,35 @@ names(subi_forester)
 
 
 
-#Renaming columns
+#Google Routes API - Creating Distance Column------------
+
+apiKey <- "AIzaSyC_Aj4oQDeNKC4M-1fG2tuSIKJkFOFl6Us"
+register_google(key = apiKey)
+
+set_key(apiKey)
+
+destination1 <- c(45.70750,-112.22912)
+
+#Setting to University of Montana, although this can be optimized to give the user the choice.
+missoula <- c(46.862538,-113.987860)
 
 
+# Get directions using google_directions
+route <- google_directions(origin = origin1, destination = destination1, mode = "driving", key = apiKey)
 
+route = route$routes$legs
+route2 = route[[1]]
+route2 = route2$distance$value
+
+subi_forester <- subi_forester %>%
+  rowwise() %>%
+  mutate(
+    distance = google_distance(
+      origin = missoula,
+      destination = c(latitude, longitude),
+      mode = "driving",
+      key = apiKey
+    )$routes$legs[[1]]$distance$value)
 
 #-------------Shiny-----------------
 
@@ -46,16 +73,14 @@ ui <- fluidPage(
   titlePanel("Interactive GGplot2 Example"),
   sidebarLayout(
     sidebarPanel(
-      # Add Shiny widgets here (e.g., sliderInput, checkboxInput, selectInput)
-      sliderInput("slider", "Select a value:", min = 0, max = 40000, value = c(0,40000)),
-      # Dropdown menu for x-axis variable
-      selectInput("xvar", "Select X-axis Variable:", choices = names(subi_forester)[c(7,15)], selected = names(subi_forester)[15]),
-      
-      # Dropdown menu for y-axis variable
-      selectInput("yvar", "Select Y-axis Variable:", choices = names(subi_forester)[c(7,15)], selected = names(subi_forester)[7])
+      sliderInput("slider", "Select a value:", min = 0, max = 40000, value = c(0, 40000)),
+      selectInput("xvar", "Select X-axis Variable:", choices = names(subi_forester)[c(7, 15)], selected = names(subi_forester)[15]),
+      selectInput("yvar", "Select Y-axis Variable:", choices = names(subi_forester)[c(7, 15)], selected = names(subi_forester)[7])
     ),
     mainPanel(
-      plotOutput("plot")  # This is where the ggplot2 plot will be displayed
+      plotOutput("plot"), # This is where the ggplot2 plot will be displayed
+    
+      tableOutput("table") 
     )
   )
 )
@@ -67,7 +92,7 @@ ui <- fluidPage(
 server <- function(input, output) {
   # Create a reactive object that depends on the slider input
   reactive_data <- reactive({
-    data <- subi_forester[, c(input$xvar, input$yvar)]
+    data <- subi_forester[, c(input$xvar, input$yvar, "url")]
     filtered_data <- data[data[, input$xvar] <= input$slider[2] & data[, input$xvar] >= input$slider[1], ]
     return(filtered_data)
   })
@@ -76,6 +101,11 @@ server <- function(input, output) {
   output$plot <- renderPlot({
     ggplot(reactive_data(), aes(x = .data[[input$xvar]], y = .data[[input$yvar]])) +
       geom_point()
+  })
+  
+  # Create a table to display the data points
+  output$table <- renderTable({
+    reactive_data()
   })
 }
 
