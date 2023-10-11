@@ -5,6 +5,7 @@ library(shiny)
 library(ggmap)
 library(googleway)
 
+library(geodist)
 
 #--------Setting-Working-Directory---------------------------------------------------------------------------
 
@@ -20,7 +21,10 @@ setwd(workingdirectory)
 #-------------Datasets-----------------
 
 subi_forester = read.csv(paste(workingdirectory,"\\subaruForesters_Carbitrage.csv",sep=""))
-names(subi_forester)
+
+#with distances
+subi_forester3 = read.csv(paste(workingdirectory,"\\subiforester2.csv",sep=""))
+
 
 
 #-------------Filtering-----------------
@@ -31,7 +35,10 @@ names(subi_forester)
 #   select(url, location, time_posted, make, model, year, odometer, title, paint, 
 #          cylinders, fuel, type, transmission, condition, price, num_images, latitude, longitude)
 
-
+subi_forester = subi_forester %>%
+  filter(latitude > 0 & latitude < 180 & longitude < 0 & longitude > -180) %>%
+  select(url, location, time_posted, make, model, year, odometer, title, paint, 
+                   cylinders, fuel, type, transmission, condition, price, num_images, latitude, longitude)
 
 #Google Routes API - Creating Distance Column------------
 
@@ -47,21 +54,44 @@ missoula <- c(46.862538,-113.987860)
 
 
 # Get directions using google_directions
-route <- google_directions(origin = origin1, destination = destination1, mode = "driving", key = apiKey)
+route <- google_directions(origin = missoula, destination = c(subi_forester$latitude[2], subi_forester$longitude[2]), mode = "driving", key = apiKey)$routes$legs[[1]]$distance$value
 
-route = route$routes$legs
+route = route$routes$legs[[1]]$distance$value
+
 route2 = route[[1]]
 route2 = route2$distance$value
 
+#Dont want to delete, but isn't working
 subi_forester <- subi_forester %>%
   rowwise() %>%
   mutate(
-    distance = google_distance(
-      origin = missoula,
-      destination = c(latitude, longitude),
-      mode = "driving",
-      key = apiKey
-    )$routes$legs[[1]]$distance$value)
+    distance = google_directions(origin = missoula, destination = c(latitude, longitude), mode = "driving", key = apiKey)$routes$legs[[1]]$distance$value
+
+  )
+
+distances <- vector("numeric", length = nrow(subi_forester))
+
+# Calculate distances using Google Directions API and store them in the vector
+for (i in 1:nrow(subi_forester)) {
+  origin <- missoula
+  destination <- data.frame(lon = subi_forester$longitude[i], lat = subi_forester$latitude[i])
+  
+  tryCatch(
+    {
+      route <- google_directions(origin = c(46.862538,-113.987860), destination = c(subi_forester$latitude[i], subi_forester$longitude[i]), mode = "driving", key = apiKey)
+      distances[i] <- route$routes$legs[[1]]$distance$value
+    },
+    error = function(e) {
+      # Handle errors, for example, by setting a special value or NA for distances
+      distances[i] <- NA
+    }
+  )
+}
+
+subi_forester2 <- subi_forester %>%
+  mutate(distance = distances)
+
+write.csv(subi_forester2, file = "subiforester2.csv", row.names = FALSE)
 
 #-------------Shiny-----------------
 
