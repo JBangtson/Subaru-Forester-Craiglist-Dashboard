@@ -1,17 +1,15 @@
-#If you haven't installed required packages:
+#If you haven't installed required packages (Highlight all and press Ctrl+Shift+C ):
 # install.packages("ggplot2")
 # install.packages("ggforce")
-#install.packages("shiny")
-# install.packages("mapview")
+# install.packages("shiny")
 # install.packages("leaflet")
-#install.packages("shinythemes")
+# install.packages("shinythemes")
 
 #---------Libraries---------------
-library(dplyr)
+
 library(ggplot2)
 library(ggforce)
 library(shiny)
-#library(mapview) Not used
 library(leaflet)
 library(shinythemes)
 
@@ -143,7 +141,7 @@ ui <- fluidPage(
                    fluidRow(
                      column(12,
                             h3("Find Your Subaru Forester"),
-                            p(""),
+                            p("Navigate the Filters to the Left and Locate Your Car Within Table Below"),
                             hr()  # Optional horizontal line for visual separation
                      )
                    ),
