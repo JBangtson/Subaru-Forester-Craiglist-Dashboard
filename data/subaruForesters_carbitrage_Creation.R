@@ -23,7 +23,7 @@ setwd(workingdirectory)
 subi_forester = read.csv(paste(workingdirectory,"\\subaruForesters_Carbitrage.csv",sep=""))
 
 #with distances
-subi_forester3 = read.csv(paste(workingdirectory,"\\subiforester2.csv",sep=""))
+subi_forester = read.csv(paste(workingdirectory,"\\subiforester2.csv",sep=""))
 
 
 
