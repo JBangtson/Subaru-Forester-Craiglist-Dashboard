@@ -25,19 +25,24 @@ library(shinythemes)
 #Laptop
 #workingdirectory = 'C:\\Users\\Bangt\\01_College\\02_CurrentClasses\\Telling Stories\\TellingStoriesWithData\\Module2\\data'
 
-workingdirectory = "data"
-setwd(workingdirectory)
+
 
 #-------------Datasets-----------------
 
-#subi_forester = read.csv(paste(workingdirectory,"\\subaruForesters_Carbitrage.csv",sep=""))
+# Load the dataset for Subaru Foresters using file.path() for cross-platform compatibility
+subi_forester = read.csv(file.path("data", "subiforester3.csv"))
 
-#with distances
-#subi_forester = read.csv(paste(workingdirectory,"\\subiforester2.csv",sep=""))
+# Alternative approaches if needed:
+# 1. Using here package (recommended)
+# library(here)
+# subi_forester = read.csv(here("data", "subiforester3.csv"))
 
-#Script
-subi_forester = read.csv("subiforester3.csv")
-#color_palette <- c("green" = "green", "silver" = "#adadad", "black" ="black",  "white"="white",  "white" = "blue" ,  "red" = "red"  ,  "grey"= "grey" ,    "brown"=  "brown" , "custom"= "pink", "yellow"=  "yellow","orange"= "orange","purple"="purple")
+# 2. Using absolute path (keep commented as backup)
+# subi_forester = read.csv(paste(workingdirectory,"\\subaruForesters_Carbitrage.csv",sep=""))
+# subi_forester = read.csv(paste(workingdirectory,"\\subiforester2.csv",sep=""))
+
+# Define a color palette for visualization
+color_palette <- c("green" = "green", "silver" = "#adadad", "black" ="black", "white"="white", "blue" = "blue", "red" = "red", "grey"= "grey", "brown"= "brown", "custom"= "pink", "yellow"= "yellow", "orange"= "orange", "purple"="purple")
 #-------------Shiny-----------------
       
 
